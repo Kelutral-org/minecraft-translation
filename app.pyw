@@ -90,12 +90,13 @@ def validate():
 	master = en_us[nv_keylist[masterIndex]]
 
 	if current == master:
-		return False
+		return '#000000'
 	else:
-		return True
+		return '#38761d'
 
 editing = Label(master=disp, text=f"Currently Editing: {nv_keylist[masterIndex]}", wraplength=500)
-value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500, fg='#38761d' if validate() else '#000000')
+value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500)
+value.config(foreground=validate())
 
 editing.pack()
 value.pack()
@@ -107,8 +108,9 @@ entry.pack()
 def updateCallback():
 	global masterIndex
 	nv_pn[nv_keylist[masterIndex]] = newText.get()
-
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
+
+	value.config(foreground=validate())
 	disp.update_idletasks()
 
 newText = Entry(master=entry, width=60)
@@ -128,6 +130,7 @@ def cycleLeft():
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
+	value.config(foreground=validate())
 	newText.delete(0, tk.END)
 	disp.update_idletasks()
 
@@ -138,6 +141,7 @@ def cycleRight():
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
+	value.config(foreground=validate())
 	newText.delete(0, tk.END)
 	disp.update_idletasks()
 
