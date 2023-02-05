@@ -7,3 +7,5 @@ How to Install:
 - Run `app.pyw`
 - Make your edits to the Minecraft .lang file via the interface.
 - Save and quit will automatically publish your changes to the pre-validation branch for approval.
+
+This project is currently 26.65% complete as of the most recent merge.
