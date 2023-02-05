@@ -4,8 +4,13 @@ from tkinter.ttk import *
 
 import json
 import git
+import os
+import string
+import random
 
-branch_name = "pre-validation"
+from dotenv import load_dotenv
+load_dotenv()
+
 refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
 
 # Initializes repository from the Master Tree
@@ -15,10 +20,15 @@ try:
 except git.exc.GitCommandError as error:
 	print(f'Error creating remote: {error}')
 
-try:
-	repo.remotes.origin.pull(refspec)
-except GitCommandError:
+repo.remotes.origin.pull(f'refs/heads/master:refs/heads/master', rebase=True)
+
+if os.path.exists('.env'):
+	branch_name = os.environ.get('BRANCH')
+else:
+	branch_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
 	repo.create_head(branch_name)
+	with open('.env', 'w') as fh:
+		fh.write(f'BRANCH = {branch_name}')
 
 branch = repo.heads[branch_name]
 branch.checkout()
@@ -45,6 +55,14 @@ def countToDo():
 				to_do += 1
 		except KeyError:
 			continue
+
+	with open('readme.md', 'r', encoding='utf-8') as fh:
+		readme = fh.readlines()
+
+	readme[10] = f"This project is currently {round((completed / (to_do + completed)) * 100, 2)}% complete as of the most recent merge."
+
+	with open('readme.md', 'w', encoding='utf-8') as fh:
+		fh.writelines(readme)
 
 	return f"Translation project {round((completed / (to_do + completed)) * 100, 2)}% complete! {to_do} lines remaining."
 
@@ -124,6 +142,7 @@ def saveCallback():
 		json.dump(nv_pn, fh, indent=4, ensure_ascii=False)
 
 	repo.index.add('nv_pn.json')
+	repo.index.add('readme.md')
 	repo.index.commit(f"Submitted edits to nv_pn.json for review")
 	try:
 		repo.remotes.origin.push(refspec)
