@@ -81,8 +81,18 @@ subheader.pack()
 disp = Frame(master=window, padding=20)
 disp.pack()
 
+def validate():
+	global masterIndex
+	current = nv_pn[nv_keylist[masterIndex]]
+	master = en_us[nv_keylist[masterIndex]]
+
+	if current == master:
+		return False
+	else:
+		return True
+
 editing = Label(master=disp, text=f"Currently Editing: {nv_keylist[masterIndex]}", wraplength=500)
-value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500)
+value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500, fg='#38761d' if validate() else '#000000')
 
 editing.pack()
 value.pack()
