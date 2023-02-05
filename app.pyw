@@ -56,12 +56,12 @@ def countToDo():
 		except KeyError:
 			continue
 
-	with open('readme.md', 'r', encoding='utf-8') as fh:
+	with open('README.md', 'r', encoding='utf-8') as fh:
 		readme = fh.readlines()
 
 	readme[10] = f"This project is currently {round((completed / (to_do + completed)) * 100, 2)}% complete as of the most recent merge."
 
-	with open('readme.md', 'w', encoding='utf-8') as fh:
+	with open('README.md', 'w', encoding='utf-8') as fh:
 		fh.writelines(readme)
 
 	return f"Translation project {round((completed / (to_do + completed)) * 100, 2)}% complete! {to_do} lines remaining."
@@ -142,7 +142,7 @@ def saveCallback():
 		json.dump(nv_pn, fh, indent=4, ensure_ascii=False)
 
 	repo.index.add('nv_pn.json')
-	repo.index.add('readme.md')
+	repo.index.add('README.md')
 	repo.index.commit(f"Submitted edits to nv_pn.json for review")
 	try:
 		repo.remotes.origin.push(refspec)
