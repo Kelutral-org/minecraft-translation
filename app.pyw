@@ -49,6 +49,7 @@ def countToDo():
 	return f"Translation project {round((completed / (to_do + completed)) * 100, 2)}% complete! {to_do} lines remaining."
 
 window = Tk()
+window.title('Kelutral.org Minecraft Translation Assistant')
 window.geometry("600x300")
 
 # Header Text
