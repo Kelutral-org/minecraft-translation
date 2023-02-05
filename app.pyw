@@ -3,6 +3,25 @@ from tkinter import *
 from tkinter.ttk import *
 
 import json
+import git
+
+branch_name = "pre-validation"
+refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
+
+# Initializes repository from the Master Tree
+repo = git.Repo()
+try:
+	remote = repo.create_remote('origin', url='https://github.com/Kelutral-org/minecraft-translation')
+except git.exc.GitCommandError as error:
+	print(f'Error creating remote: {error}')
+
+try:
+	repo.remotes.origin.pull(refspec)
+except GitCommandError:
+	repo.create_head(branch_name)
+
+branch = repo.heads[branch_name]
+branch.checkout()
 
 masterIndex = 0
 
@@ -102,6 +121,13 @@ footer.pack(anchor='se', side='bottom')
 def saveCallback():
 	with open('nv_pn.json', 'w', encoding='utf-8') as fh:
 		json.dump(nv_pn, fh, indent=4, ensure_ascii=False)
+
+	repo.index.add('nv_pn.json')
+	repo.index.commit(f"Submitted edits to nv_pn.json for review")
+	try:
+		repo.remotes.origin.push(refspec)
+	except Exception as e:
+		print(f'Error: {e}')
 
 	window.destroy()
 
