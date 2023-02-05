@@ -11,8 +11,6 @@ import random
 from dotenv import load_dotenv
 load_dotenv()
 
-refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
-
 # Initializes repository from the Master Tree
 repo = git.Repo()
 try:
@@ -29,6 +27,8 @@ else:
 	repo.create_head(branch_name)
 	with open('.env', 'w') as fh:
 		fh.write(f'BRANCH = {branch_name}')
+
+refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
 
 branch = repo.heads[branch_name]
 branch.checkout()
