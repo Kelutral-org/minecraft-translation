@@ -20,8 +20,8 @@ except git.exc.GitCommandError as error:
 
 try:
 	repo.remotes.origin.pull(rebase=True)
-except:
-	repo.remotes.origin.pull()
+except Exception as e:
+	print(f'Error creating remote: {e}')
 
 if os.path.exists('.env'):
 	branch_name = os.environ.get('BRANCH')
