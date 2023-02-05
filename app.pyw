@@ -3,6 +3,38 @@ from tkinter import *
 from tkinter.ttk import *
 
 import json
+import git
+import os
+import string
+import random
+
+from dotenv import load_dotenv
+load_dotenv()
+
+# Initializes repository from the Master Tree
+repo = git.Repo()
+try:
+	remote = repo.create_remote('origin', url='https://github.com/Kelutral-org/minecraft-translation')
+except git.exc.GitCommandError as error:
+	print(f'Error creating remote: {error}')
+
+try:
+	repo.remotes.origin.pull(rebase=True)
+except Exception as e:
+	print(f'Error creating remote: {e}')
+
+if os.path.exists('.env'):
+	branch_name = os.environ.get('BRANCH')
+else:
+	branch_name = ''.join(random.choices(string.ascii_lowercase + string.digits, k=16))
+	repo.create_head(branch_name)
+	with open('.env', 'w') as fh:
+		fh.write(f'BRANCH = {branch_name}')
+
+refspec = f'refs/heads/{branch_name}:refs/heads/{branch_name}'
+
+branch = repo.heads[branch_name]
+branch.checkout()
 
 masterIndex = 0
 
@@ -27,9 +59,18 @@ def countToDo():
 		except KeyError:
 			continue
 
+	with open('README.md', 'r', encoding='utf-8') as fh:
+		readme = fh.readlines()
+
+	readme[10] = f"This project is currently {round((completed / (to_do + completed)) * 100, 2)}% complete as of the most recent merge."
+
+	with open('README.md', 'w', encoding='utf-8') as fh:
+		fh.writelines(readme)
+
 	return f"Translation project {round((completed / (to_do + completed)) * 100, 2)}% complete! {to_do} lines remaining."
 
 window = Tk()
+window.title('Kelutral.org Minecraft Translation Assistant')
 window.geometry("600x300")
 
 # Header Text
@@ -43,8 +84,19 @@ subheader.pack()
 disp = Frame(master=window, padding=20)
 disp.pack()
 
+def validate():
+	global masterIndex
+	current = nv_pn[nv_keylist[masterIndex]]
+	master = en_us[nv_keylist[masterIndex]]
+
+	if current == master:
+		return '#000000'
+	else:
+		return '#38761d'
+
 editing = Label(master=disp, text=f"Currently Editing: {nv_keylist[masterIndex]}", wraplength=500)
 value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500)
+value.config(foreground=validate())
 
 editing.pack()
 value.pack()
@@ -56,8 +108,9 @@ entry.pack()
 def updateCallback():
 	global masterIndex
 	nv_pn[nv_keylist[masterIndex]] = newText.get()
-
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
+
+	value.config(foreground=validate())
 	disp.update_idletasks()
 
 newText = Entry(master=entry, width=60)
@@ -77,6 +130,7 @@ def cycleLeft():
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
+	value.config(foreground=validate())
 	newText.delete(0, tk.END)
 	disp.update_idletasks()
 
@@ -87,6 +141,7 @@ def cycleRight():
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
+	value.config(foreground=validate())
 	newText.delete(0, tk.END)
 	disp.update_idletasks()
 
@@ -102,6 +157,14 @@ footer.pack(anchor='se', side='bottom')
 def saveCallback():
 	with open('nv_pn.json', 'w', encoding='utf-8') as fh:
 		json.dump(nv_pn, fh, indent=4, ensure_ascii=False)
+
+	repo.index.add('nv_pn.json')
+	repo.index.add('README.md')
+	repo.index.commit(f"Submitted edits to nv_pn.json for review")
+	try:
+		repo.remotes.origin.push(refspec)
+	except Exception as e:
+		print(f'Error: {e}')
 
 	window.destroy()
 
