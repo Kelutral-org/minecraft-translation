@@ -75,7 +75,7 @@
     "gui.socialInteractions.server_label.single": "%s - %s player",
     "gui.socialInteractions.server_label.multiple": "%s - %s players",
     "gui.socialInteractions.search_hint": "Fwew...",
-    "gui.socialInteractions.search_empty": "Ke tsun rivun kea uvansiyuot a fko syaw tsatstxo",
+    "gui.socialInteractions.search_empty": "Ke tsun rivun kea uvansiyuot a poru fko syaw tsatstxo",
     "gui.socialInteractions.empty_hidden": "No players hidden in chat",
     "gui.socialInteractions.empty_blocked": "No blocked players in chat",
     "gui.socialInteractions.hide": "Hide in Chat",
