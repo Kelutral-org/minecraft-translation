@@ -105,9 +105,11 @@ def validate():
 editing = Label(master=disp, text=f"Currently Editing: {nv_keylist[masterIndex]}", wraplength=500)
 value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500)
 value.config(foreground=validate()[0])
+original_value = Label(master=disp, text=f"Original Value: {en_us[nv_keylist[masterIndex]]}", wraplength=500)
 
 editing.pack()
 value.pack()
+original_value.pack()
 
 # Entry Frame
 entry = Frame(master=window)
@@ -117,7 +119,9 @@ def updateCallback():
 	global masterIndex
 	nv_pn[nv_keylist[masterIndex]] = newText.get()
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
+	original_value['text'] = f"Original Value: {en_us[nv_keylist[masterIndex]]}"
 
+	original_value.pack()
 	value.config(foreground=validate()[0])
 	disp.update_idletasks()
 
@@ -142,15 +146,25 @@ def cycleLeft():
 			else:
 				masterIndex = len(nv_keylist) - 1
 
+		original_value.pack()
+
 	elif masterMode == 2:
 		while validate()[1]:
 			if masterIndex > 0:
 				masterIndex -= 1
 			else:
 				masterIndex = len(nv_keylist) - 1
+		
+		original_value.pack_forget()
+	else:
+		if validate()[1]:
+			original_value.pack()
+		else:
+			original_value.pack_forget()
 
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
+	original_value['text'] = f"Original Value: {en_us[nv_keylist[masterIndex]]}"
 
 	value.config(foreground=validate()[0])
 	newText.delete(0, tk.END)
@@ -167,15 +181,24 @@ def cycleRight():
 			else:
 				masterIndex = 0
 
+		original_value.pack()
+
 	elif masterMode == 2:
 		while validate()[1]:
 			if masterIndex < len(nv_keylist) - 1:
 				masterIndex += 1
 			else:
 				masterIndex = 0
+		original_value.pack_forget()
+	else:
+		if validate()[1]:
+			original_value.pack()
+		else:
+			original_value.pack_forget()
 
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
+	original_value['text'] = f"Original Value: {en_us[nv_keylist[masterIndex]]}"
 
 	value.config(foreground=validate()[0])
 	newText.delete(0, tk.END)
