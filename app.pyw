@@ -37,6 +37,7 @@ branch = repo.heads[branch_name]
 branch.checkout()
 
 masterIndex = 0
+masterMode = 0
 
 with open('nv_pn.json', 'r', encoding='utf-8') as fh:
 	nv_pn = json.load(fh)
@@ -87,16 +88,23 @@ disp.pack()
 def validate():
 	global masterIndex
 	current = nv_pn[nv_keylist[masterIndex]]
-	master = en_us[nv_keylist[masterIndex]]
+	try:
+		master = en_us[nv_keylist[masterIndex]]
+	except KeyError:
+		nv_pn.pop(nv_keylist[masterIndex])
+		master = None
 
-	if current == master:
-		return '#000000'
+	if master != None:
+		if current == master:
+			return ('#000000', False)
+		else:
+			return ('#38761d', True)
 	else:
-		return '#38761d'
+		return ('#acacac', False)
 
 editing = Label(master=disp, text=f"Currently Editing: {nv_keylist[masterIndex]}", wraplength=500)
 value = Label(master=disp, text=f"Value: {nv_pn[nv_keylist[masterIndex]]}", wraplength=500)
-value.config(foreground=validate())
+value.config(foreground=validate()[0])
 
 editing.pack()
 value.pack()
@@ -110,7 +118,7 @@ def updateCallback():
 	nv_pn[nv_keylist[masterIndex]] = newText.get()
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
-	value.config(foreground=validate())
+	value.config(foreground=validate()[0])
 	disp.update_idletasks()
 
 newText = Entry(master=entry, width=60)
@@ -127,10 +135,24 @@ def cycleLeft():
 	global masterIndex
 	masterIndex -= 1
 
+	if masterMode == 1:
+		while not validate()[1]:
+			if masterIndex > 0:
+				masterIndex -= 1
+			else:
+				masterIndex = len(nv_keylist) - 1
+
+	elif masterMode == 2:
+		while validate()[1]:
+			if masterIndex > 0:
+				masterIndex -= 1
+			else:
+				masterIndex = len(nv_keylist) - 1
+
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
-	value.config(foreground=validate())
+	value.config(foreground=validate()[0])
 	newText.delete(0, tk.END)
 	disp.update_idletasks()
 
@@ -138,10 +160,24 @@ def cycleRight():
 	global masterIndex
 	masterIndex += 1
 
+	if masterMode == 1:
+		while not validate()[1]:
+			if masterIndex < len(nv_keylist) - 1:
+				masterIndex += 1
+			else:
+				masterIndex = 0
+
+	elif masterMode == 2:
+		while validate()[1]:
+			if masterIndex < len(nv_keylist) - 1:
+				masterIndex += 1
+			else:
+				masterIndex = 0
+
 	editing['text'] = f"Currently Editing: {nv_keylist[masterIndex]}"
 	value['text'] = f"Value: {nv_pn[nv_keylist[masterIndex]]}"
 
-	value.config(foreground=validate())
+	value.config(foreground=validate()[0])
 	newText.delete(0, tk.END)
 	disp.update_idletasks()
 
@@ -151,8 +187,29 @@ cycleRight = Button(master=cycle, text="Next", command=cycleRight)
 cycleLeft.pack(side = 'left', padx=5)
 cycleRight.pack(side = 'left', padx=5)
 
+mode = Frame(master=window, padding=10)
+mode.pack()
+
+Label(master=mode, text="Editing Mode:").pack(side='left')
+
+options = [
+	"View All",
+	"View All",
+	"Proofreading",
+	"Translating"
+]
+
+clicked = StringVar(mode)
+
+def dropdownCallback(val):
+	global masterMode
+	masterMode = options.index(val) - 1 if options.index(val) != 0 else options.index(val)
+
+drop = OptionMenu(mode, clicked, *options, command=dropdownCallback)
+drop.pack(side='left')
+
 footer = Frame(master=window, padding=10)
-footer.pack(anchor='se', side='bottom')
+footer.pack()
 
 def saveCallback():
 	with open('nv_pn.json', 'w', encoding='utf-8') as fh:
@@ -168,6 +225,6 @@ def saveCallback():
 
 	window.destroy()
 
-Button(master=footer, text="Save and Quit", command=saveCallback).pack()
+Button(master=footer, text="Save and Quit", command=saveCallback).pack(anchor='se', side='bottom')
 
 window.mainloop()
